@@ -59,9 +59,19 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     echo json_encode($res);
 
 } else if ($_SERVER['REQUEST_METHOD'] == "DELETE") {
+    
+    //como su nombre lo dice es para ver que estan en los headers
+    $headers = getallheaders();
+
+    $token = Null;
+    if(isset($headers['token'])){
+        $token = $headers['token'];
+    }
+    
     $postBody = file_get_contents("php://input");
+
     //enviamos esto al manejador
-    $res = $_pacientes->delete($postBody);
+    $res = $_pacientes->delete($postBody, $token);
     header('Content-Type: application/json');
     //esatdo de lo que estamos respondiendo
     if (isset($res["result"]["error_id"])) {
@@ -71,7 +81,9 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
         http_response_code(200);
     }
     //enviamos la respuesta de la peticion
+    
     echo json_encode($res);
+
 
 } else {
     header('Content-Type: application/json');

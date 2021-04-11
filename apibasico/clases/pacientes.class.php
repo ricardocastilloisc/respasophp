@@ -205,10 +205,13 @@ class pacientes extends conexion
         }
     }
 
-    public function delete($json)
+    public function delete($json, $token = Null)
     {
         $_respuestas = new respuestas;
         $datos = json_decode($json, true);
+        if(isset($token)){
+            $datos['token'] = $token;
+        }
 
         if (!isset($datos['token'])) {
             return $_respuestas->error_401();
