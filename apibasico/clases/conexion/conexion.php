@@ -35,6 +35,7 @@ class conexion
     }
 
 
+    //para poder identificar los carrecteres especiales
     private function convertirUTF8($array)
     {
         array_walk_recursive($array, function (&$item, $key) {
@@ -45,6 +46,7 @@ class conexion
         return $array;
     }
 
+    //obtener datos como arrays con keys para poder convertrir a json
     public function obtenerDatos($sqlstr)
     {
         $results = $this->conexion->query($sqlstr);
