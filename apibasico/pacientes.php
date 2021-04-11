@@ -45,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     echo json_encode($res);
 } else if ($_SERVER['REQUEST_METHOD'] == "PUT") {
     $postBody = file_get_contents("php://input");
-
     //enviamos esto al manejador
     $res = $_pacientes->put($postBody);
     header('Content-Type: application/json');
@@ -60,7 +59,20 @@ if ($_SERVER['REQUEST_METHOD'] == "GET") {
     echo json_encode($res);
 
 } else if ($_SERVER['REQUEST_METHOD'] == "DELETE") {
-    echo "hola delete";
+    $postBody = file_get_contents("php://input");
+    //enviamos esto al manejador
+    $res = $_pacientes->delete($postBody);
+    header('Content-Type: application/json');
+    //esatdo de lo que estamos respondiendo
+    if (isset($res["result"]["error_id"])) {
+        $responseCode = $res["result"]["error_id"];
+        http_response_code($responseCode);
+    } else {
+        http_response_code(200);
+    }
+    //enviamos la respuesta de la peticion
+    echo json_encode($res);
+
 } else {
     header('Content-Type: application/json');
     $datosArray = $_respuestas->error_405();
