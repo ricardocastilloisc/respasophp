@@ -18,17 +18,33 @@ if($_SERVER['REQUEST_METHOD'] == "GET"){
     if(isset($_GET["page"])){
         $page = $_GET["page"];
         $listapacientes  = $_pacientes->listaPaciente($page);
+        header('Content-Type: application/json');
         echo json_encode($listapacientes);
+        http_response_code(200);
     }else if(isset($_GET["id"])){
         $pacienteID = $_GET["id"];
         $datospaciente = $_pacientes->obtenerpaciente($pacienteID);
+        header('Content-Type: application/json');
         echo json_encode($datospaciente);
+        http_response_code(200);
     }
-    
 }
 else if($_SERVER['REQUEST_METHOD'] == "POST"){
-    echo "hola post";
-    
+    //recibimos los datos enviados
+    $postBody = file_get_contents("php://input");
+    //enviamos esto al manejador
+    $res = $_pacientes->post($postBody);
+    header('Content-Type: application/json');
+    //esatdo de lo que estamos respondiendo
+    if(isset($res["result"]["error_id"]))
+    {
+        $responseCode = $res["result"]["error_id"];
+        http_response_code($responseCode);
+    }else{
+        http_response_code(200);
+    }
+    //enviamos la respuesta de la peticion
+    echo json_encode($res);
 }
 else if($_SERVER['REQUEST_METHOD'] == "PUT"){
     echo "hola put";
