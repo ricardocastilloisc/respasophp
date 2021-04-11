@@ -18,6 +18,8 @@ class pacientes extends conexion
     private $correo = "";
 
     private $token = "";
+
+    private $img = "";
     //cuando pongo = significa que es opcional
     //instancio desde que calor va ser mi variable
     public function listaPaciente($pagina = 1)
@@ -67,6 +69,15 @@ class pacientes extends conexion
         ) {
             return $_respuestas->error_400();
         } else {
+
+
+            if(isset($datos['img']))
+            {
+                $this->img = $this->procesarImagen($datos['img']);
+            }
+
+
+
             $this->nombre = $datos['nombre'];
             $this->dni = $datos['dni'];
             $this->correo = $datos['correo'];
@@ -100,7 +111,7 @@ class pacientes extends conexion
     private function insertarPaciente()
     {
         $query = "INSERT INTO " . $this->table
-            . " (DNI,Nombre,Direccion,CodigoPostal,Telefono,Genero,FechaNacimiento,Correo) 
+            . " (DNI,Nombre,Direccion,CodigoPostal,Telefono,Genero,FechaNacimiento,Correo,img) 
         VALUES 
         ('"
             . $this->dni . "','"
@@ -110,7 +121,8 @@ class pacientes extends conexion
             . $this->telefono . "','"
             . $this->genero . "','"
             . $this->fechaNacimiento . "','"
-            . $this->correo . "')";
+            . $this->correo . "','"
+            . $this->img . "')";
         $resp = parent::nonQueryId($query);
         if ($resp) {
             return $resp;
@@ -138,8 +150,6 @@ class pacientes extends conexion
                 return $_respuestas->error_401("Token que envio es invalido o caducado");
             }
         }
-
-
 
         if (
             !isset($datos['pacienteId'])
@@ -282,5 +292,27 @@ class pacientes extends conexion
         } else {
             return 0;
         }
+    }
+
+    private function procesarImagen($img){
+        //aqui apuntamos a los que haya y nos da la direccion donde va estar la carpeta
+        $direccion = dirname(__DIR__) . "\public\imagenes\\";
+        //hacemos un array en dos o mas de un string quitando le el separador 
+        $partes = explode(";base64,", $img);
+
+        $extencion  = explode('/', mime_content_type($img))[1];
+
+        $imagen_base64 = base64_decode($partes[1]);
+
+        ///uniqid es para generar un string unico 
+        $file = $direccion . uniqid() . "." .$extencion;
+        //esto guarda el archivo en la carpeta del servidro donde asignamos
+        file_put_contents($file, $imagen_base64);
+
+        //esto pone las / en el nombre del archivo
+        $nuevadireccion = str_replace('\\', '/', $file);
+
+        return $nuevadireccion;
+
     }
 }
