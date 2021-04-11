@@ -1,7 +1,7 @@
 <?php 
 
 class respuestas{
-    private $response = [
+    public $response = [
         "status" => "ok",
         "result" => array()
     ];
@@ -12,7 +12,7 @@ class respuestas{
             "error" =>"405",
             "error_msg" => "metodo no permitido"
         );
-        return $response;
+        return $this->response;
     }
 
     public function error_200($valor = "Datos incorrectos"){
@@ -21,7 +21,7 @@ class respuestas{
             "error_id" =>"200",
             "error_msg" => $valor
         );
-        return $response;
+        return $this->response;
     }
 
     public function error_400(){
@@ -30,7 +30,17 @@ class respuestas{
             "error_id" =>"400",
             "error_msg" => "Datos enviados incompletos o con formato incorrecto"
         );
-        return $response;
+        return $this->response;
+    }
+
+    
+    public function error_500($valor = "Error interno del servidor"){
+        $this->response['status'] = "error";
+        $this->response['result'] = array(
+            "error_id" =>"500",
+            "error_msg" => $valor
+        );
+        return $this->response;
     }
 }
 ?>

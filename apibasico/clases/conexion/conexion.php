@@ -77,4 +77,9 @@ class conexion
             return 0;
         }
     }
+    //esto solo se puede usar si se hereda
+    protected function encriptar($string){
+        return md5($string);
+    }
+
 }
