@@ -16,6 +16,8 @@ class pacientes extends conexion
     private $telefono = "";
     private $fechaNacimiento = "0000-00-00";
     private $correo = "";
+
+    private $token = "";
     //cuando pongo = significa que es opcional
     //instancio desde que calor va ser mi variable
     public function listaPaciente($pagina = 1)
@@ -45,6 +47,18 @@ class pacientes extends conexion
     {
         $_respuestas = new respuestas;
         $datos = json_decode($json, true);
+
+        if (!isset($datos['token'])) {
+            return $_respuestas->error_401();
+        } else {
+            $this->token = $datos['token'];
+            $arrayToken = $this->buscartoken();
+            if ($arrayToken) {
+                $this->actualizarToken($arrayToken[0]['TokenId']);
+            } else {
+                return $_respuestas->error_401("Token que envio es invalido o caducado");
+            }
+        }
 
         if (
             !isset($datos['nombre'])
@@ -107,8 +121,25 @@ class pacientes extends conexion
 
     public function put($json)
     {
+
         $_respuestas = new respuestas;
         $datos = json_decode($json, true);
+
+
+
+        if (!isset($datos['token'])) {
+            return $_respuestas->error_401();
+        } else {
+            $this->token = $datos['token'];
+            $arrayToken = $this->buscartoken();
+            if ($arrayToken) {
+                $this->actualizarToken($arrayToken[0]['TokenId']);
+            } else {
+                return $_respuestas->error_401("Token que envio es invalido o caducado");
+            }
+        }
+
+
 
         if (
             !isset($datos['pacienteId'])
@@ -142,7 +173,7 @@ class pacientes extends conexion
             }
 
             $resp = $this->modificarPaciente();
-            
+
             if ($resp) {
                 $respuesta = $_respuestas->response;
                 $respuesta["result"] = array("pacienteId" => $this->pacienteId);
@@ -150,7 +181,6 @@ class pacientes extends conexion
             } else {
                 return $_respuestas->error_500();
             }
-            
         }
     }
 
@@ -167,7 +197,7 @@ class pacientes extends conexion
         FechaNacimiento ='"    . $this->fechaNacimiento . "',
         Correo ='"    . $this->correo . "' WHERE PacienteId = '" . $this->pacienteId . "'";
         $resp = parent::nonQuery($query);
-        
+
         if ($resp >= 1) {
             return $resp;
         } else {
@@ -175,9 +205,22 @@ class pacientes extends conexion
         }
     }
 
-    public function delete($json) {
+    public function delete($json)
+    {
         $_respuestas = new respuestas;
         $datos = json_decode($json, true);
+
+        if (!isset($datos['token'])) {
+            return $_respuestas->error_401();
+        } else {
+            $this->token = $datos['token'];
+            $arrayToken = $this->buscartoken();
+            if ($arrayToken) {
+                $this->actualizarToken($arrayToken[0]['TokenId']);
+            } else {
+                return $_respuestas->error_401("Token que envio es invalido o caducado");
+            }
+        }
 
         if (
             !isset($datos['pacienteId'])
@@ -187,7 +230,7 @@ class pacientes extends conexion
             $this->pacienteId = $datos['pacienteId'];
 
             $resp = $this->eliminarPaciente();
-            
+
             if ($resp) {
                 $respuesta = $_respuestas->response;
                 $respuesta["result"] = array("pacienteId" => $this->pacienteId);
@@ -201,9 +244,36 @@ class pacientes extends conexion
 
     private function eliminarPaciente()
     {
-        $query = "DELETE FROM ".$this->table. " WHERE PacienteId = '" . $this->pacienteId . "'";
+        $query = "DELETE FROM " . $this->table . " WHERE PacienteId = '" . $this->pacienteId . "'";
         $resp = parent::nonQuery($query);
-        
+
+        if ($resp >= 1) {
+            return $resp;
+        } else {
+            return 0;
+        }
+    }
+
+
+    private function buscartoken()
+    {
+        $query = "SELECT TokenId, UsuarioId, Estado FROM usuarios_token WHERE Token = '" . $this->token . "' And Estado = 'Activo'";
+        $resp = parent::obtenerDatos($query);
+        if ($resp) {
+            return $resp;
+        } else {
+            return 0;
+        }
+    }
+
+    private function actualizarToken($tokenId)
+    {
+
+        //date sirve para que me transforme la fecha actual 
+        //ahora dentro de parentesis es para saber de que formato va ser
+        $date = date("Y-m-d H:i");
+        $query = "UPDATE usuarios_token  SET Fecha = '" . $date . "' WHERE TokenId = '" . $tokenId . "'";
+        $resp = parent::nonQuery($query);
         if ($resp >= 1) {
             return $resp;
         } else {
