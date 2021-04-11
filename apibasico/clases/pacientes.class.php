@@ -73,11 +73,11 @@ class pacientes extends conexion
             }
 
             $resp = $this->insertarPaciente();
-            if($resp){
+            if ($resp) {
                 $respuesta = $_respuestas->response;
                 $respuesta["result"] = array("pacienteId" => $resp);
                 return $respuesta;
-            }else{
+            } else {
                 return $_respuestas->error_500();
             }
         }
@@ -98,9 +98,79 @@ class pacientes extends conexion
             . $this->fechaNacimiento . "','"
             . $this->correo . "')";
         $resp = parent::nonQueryId($query);
-        if($resp){
+        if ($resp) {
             return $resp;
-        }else{
+        } else {
+            return 0;
+        }
+    }
+
+    public function put($json)
+    {
+        $_respuestas = new respuestas;
+        $datos = json_decode($json, true);
+
+        if (
+            !isset($datos['pacienteId'])
+        ) {
+            return $_respuestas->error_400();
+        } else {
+            $this->pacienteId = $datos['pacienteId'];
+            if (isset($datos['dni'])) {
+                $this->dni = $datos['dni'];
+            }
+            if (isset($datos['nombre'])) {
+                $this->nombre = $datos['nombre'];
+            }
+            if (isset($datos['correo'])) {
+                $this->correo = $datos['correo'];
+            }
+            if (isset($datos['telefono'])) {
+                $this->telefono = $datos['telefono'];
+            }
+            if (isset($datos['direccion'])) {
+                $this->direccion = $datos['direccion'];
+            }
+            if (isset($datos['codigoPostal'])) {
+                $this->codigoPostal = $datos['codigoPostal'];
+            }
+            if (isset($datos['genero'])) {
+                $this->genero = $datos['genero'];
+            }
+            if (isset($datos['fechaNacimiento'])) {
+                $this->fechaNacimiento = $datos['fechaNacimiento'];
+            }
+
+            $resp = $this->modificarPaciente();
+            
+            if ($resp) {
+                $respuesta = $_respuestas->response;
+                $respuesta["result"] = array("pacienteId" => $this->pacienteId);
+                return $respuesta;
+            } else {
+                return $_respuestas->error_500();
+            }
+            
+        }
+    }
+
+
+    private function modificarPaciente()
+    {
+        $query = "UPDATE " . $this->table . " SET 
+        DNI ='" . $this->dni . "',
+        Direccion ='"    . $this->nombre . "',
+        Nombre ='"    . $this->direccion . "',
+        CodigoPostal ='"    . $this->codigoPostal . "',
+        Telefono ='"    . $this->telefono . "',
+        Genero ='"    . $this->genero . "',
+        FechaNacimiento ='"    . $this->fechaNacimiento . "',
+        Correo ='"    . $this->correo . "' WHERE PacienteId = '" . $this->pacienteId . "'";
+        $resp = parent::nonQuery($query);
+        
+        if ($resp >= 1) {
+            return $resp;
+        } else {
             return 0;
         }
     }
